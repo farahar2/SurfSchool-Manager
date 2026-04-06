@@ -5,6 +5,10 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
     header('Location: index.php?action=login');
     exit;
 }
+
+// Séparer date et heure pour les champs du formulaire
+$startParts = explode(' ', $lesson['start_datetime']);
+$endParts = explode(' ', $lesson['end_datetime']);
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +16,7 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un cours - Taghazout Surf</title>
+    <title>Modifier un cours - Taghazout Surf</title>
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
@@ -28,7 +32,7 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
         </nav>
 
         <div class="dashboard-content">
-            <h2>Créer un nouveau cours</h2>
+            <h2>Modifier le cours</h2>
 
             <?php if (isset($errors) && !empty($errors)): ?>
                 <div class="alert alert-error">
@@ -41,20 +45,18 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
             <?php endif; ?>
 
             <div class="form-card">
-                <form method="POST" action="index.php?action=create-lesson">
+                <form method="POST" action="index.php?action=edit-lesson&id=<?= $lesson['id'] ?>">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="title">Titre du cours *</label>
                             <input type="text" id="title" name="title" 
-                                   value="<?= htmlspecialchars($_POST['title'] ?? '') ?>" 
-                                   placeholder="Ex: Initiation vagues douces" required>
+                                   value="<?= htmlspecialchars($_POST['title'] ?? $lesson['title']) ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="coach_name">Nom du coach *</label>
                             <input type="text" id="coach_name" name="coach_name" 
-                                   value="<?= htmlspecialchars($_POST['coach_name'] ?? '') ?>" 
-                                   placeholder="Ex: Hassan El Idrissi" required>
+                                   value="<?= htmlspecialchars($_POST['coach_name'] ?? $lesson['coach_name']) ?>" required>
                         </div>
                     </div>
 
@@ -62,13 +64,13 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
                         <div class="form-group">
                             <label for="start_date">Date de début *</label>
                             <input type="date" id="start_date" name="start_date" 
-                                   value="<?= htmlspecialchars($_POST['start_date'] ?? '') ?>" required>
+                                   value="<?= htmlspecialchars($_POST['start_date'] ?? $startParts[0]) ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="start_time">Heure de début *</label>
                             <input type="time" id="start_time" name="start_time" 
-                                   value="<?= htmlspecialchars($_POST['start_time'] ?? '') ?>" required>
+                                   value="<?= htmlspecialchars($_POST['start_time'] ?? $startParts[1]) ?>" required>
                         </div>
                     </div>
 
@@ -76,13 +78,13 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
                         <div class="form-group">
                             <label for="end_date">Date de fin *</label>
                             <input type="date" id="end_date" name="end_date" 
-                                   value="<?= htmlspecialchars($_POST['end_date'] ?? '') ?>" required>
+                                   value="<?= htmlspecialchars($_POST['end_date'] ?? $endParts[0]) ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="end_time">Heure de fin *</label>
                             <input type="time" id="end_time" name="end_time" 
-                                   value="<?= htmlspecialchars($_POST['end_time'] ?? '') ?>" required>
+                                   value="<?= htmlspecialchars($_POST['end_time'] ?? $endParts[1]) ?>" required>
                         </div>
                     </div>
 
@@ -90,23 +92,24 @@ if (!AuthController::isLoggedIn() || !AuthController::isAdmin()) {
                         <div class="form-group">
                             <label for="max_students">Nombre maximum d'élèves *</label>
                             <input type="number" id="max_students" name="max_students" 
-                                   value="<?= htmlspecialchars($_POST['max_students'] ?? '') ?>" 
-                                   min="1" placeholder="Ex: 10" required>
+                                   value="<?= htmlspecialchars($_POST['max_students'] ?? $lesson['max_students']) ?>" 
+                                   min="1" required>
                         </div>
 
                         <div class="form-group">
                             <label for="level">Niveau requis *</label>
                             <select id="level" name="level" required>
-                                <option value="all" <?= ($_POST['level'] ?? '') == 'all' ? 'selected' : '' ?>>Tous niveaux</option>
-                                <option value="beginner" <?= ($_POST['level'] ?? '') == 'beginner' ? 'selected' : '' ?>>Débutant</option>
-                                <option value="intermediate" <?= ($_POST['level'] ?? '') == 'intermediate' ? 'selected' : '' ?>>Intermédiaire</option>
-                                <option value="advanced" <?= ($_POST['level'] ?? '') == 'advanced' ? 'selected' : '' ?>>Avancé</option>
+                                <?php $currentLevel = $_POST['level'] ?? $lesson['level']; ?>
+                                <option value="all" <?= $currentLevel == 'all' ? 'selected' : '' ?>>Tous niveaux</option>
+                                <option value="beginner" <?= $currentLevel == 'beginner' ? 'selected' : '' ?>>Débutant</option>
+                                <option value="intermediate" <?= $currentLevel == 'intermediate' ? 'selected' : '' ?>>Intermédiaire</option>
+                                <option value="advanced" <?= $currentLevel == 'advanced' ? 'selected' : '' ?>>Avancé</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Créer le cours</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
                         <a href="index.php?action=lessons-list" class="btn btn-secondary">Annuler</a>
                     </div>
                 </form>
